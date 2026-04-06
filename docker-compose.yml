@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    # 1. Nạp file .env vào để lấy các giá trị DB_USER, DB_PASSWORD...
+    # env_file:
+    #   - ./backend/.env # Không cần thiết nếu dùng environment trực tiếp bên dưới
+    environment:
+      # 2. Ánh xạ (Map) trực tiếp: Gán giá trị của DB_USER vào POSTGRES_USER
+      # Lúc này Docker sẽ lấy giá trị thực từ file .env đổ vào đây
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '5432:5432'
+    volumes:
+      - voz_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready chỉ cần chạy là đủ, không nhất thiết phải truyền user phức tạp
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  nestjs_app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env #file .env nằm trên root, không phải ở backend nữa
+    environment:
+      # Ghi đè DB_HOST vì trong Docker, NestJS phải gọi qua tên service 'postgres'
+      DB_HOST: postgres
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  voz_pg_data:

@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+  --forum-bg: #dce0e6;
+  --forum-panel: #f0f2f5;
+  --forum-text: #1c1e22;
+  --forum-muted: #5c6370;
+  --forum-border: #c5cad3;
+  --forum-border-strong: #a8b0bd;
+  --forum-header-bg: #252830;
+  --forum-header-border: #1a1d24;
+  --forum-accent: #c45c26;
+  --forum-accent-text: #b84a18;
+  --forum-accent-contrast: #fff8f4;
+  --forum-link: #1e5a8a;
+  --forum-link-hover: #144870;
+  --forum-row-hover: #e4e7ed;
+  --forum-category-head: linear-gradient(180deg, #f7f8fa 0%, #e8ebf0 100%);
+  --forum-pill-pin: #e8f4ea;
+  --forum-pill-pin-text: #1b5e20;
+  --forum-pill-lock: #fdecea;
+  --forum-pill-lock-text: #c62828;
+}
+
+@theme inline {
+  --color-background: var(--forum-bg);
+  --color-foreground: var(--forum-text);
+  --font-sans: var(--font-be-vietnam);
+  --font-mono: var(--font-jetbrains);
+  --font-display: var(--font-archivo);
+}
+
+body {
+  background: var(--forum-bg);
+  color: var(--forum-text);
+  font-family: var(--font-be-vietnam), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-archivo), "Arial Narrow", sans-serif;
+}
+
+.forum-header {
+  background: var(--forum-header-bg);
+  color: #c9cdd4;
+}
+
+.forum-topbar {
+  background: #1e2128;
+  border-bottom: 1px solid var(--forum-header-border);
+}
+
+.forum-brand {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.forum-panel-head {
+  background: var(--forum-category-head);
+  border-bottom: 1px solid var(--forum-border);
+}
+
+.forum-category-head {
+  background: var(--forum-category-head);
+}
+
+.forum-table-head {
+  background: #e2e5eb;
+}
+
+.forum-panel {
+  background: var(--forum-panel);
+}
+
+.forum-input:focus {
+  outline: 2px solid var(--forum-accent);
+  outline-offset: 0;
+}
+
+.forum-post-user {
+  box-shadow: inset -1px 0 0 var(--forum-border);
+}
+
+.post-body a {
+  color: var(--forum-link);
+  text-decoration: underline;
+}
+
+.post-body code {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.85em;
+}
