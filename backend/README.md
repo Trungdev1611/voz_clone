@@ -25,6 +25,24 @@
 
 API NestJS + TypeORM + PostgreSQL. Tài liệu stack và lộ trình: [`../PROJECT.md`](../PROJECT.md). Chạy DB: `docker compose up -d` từ thư mục gốc repo, rồi `cp .env.example .env`.
 
+### Database migrations (TypeORM)
+
+Cấu hình DB dùng chung [`src/database/typeorm.shared.ts`](src/database/typeorm.shared.ts). [`src/data-source.ts`](src/data-source.ts) chỉ bọc `DataSource` + `dotenv` cho CLI; `app.module.ts` gọi cùng `buildTypeOrmOptions`. Chạy trong thư mục `backend/` với Postgres đã bật và `.env` đúng.
+
+```bash
+# Sinh file migration sau khi đổi entity (đặt tên file sau --)
+npm run migration:generate -- src/migrations/TenMoTaThayDoi
+
+# Áp migration đã commit
+npm run migration:run
+
+# Xem trạng thái / revert một bước
+npm run migration:show
+npm run migration:revert
+```
+
+Thêm entity mới: thêm vào `typeOrmEntityList` trong `src/database/typeorm.shared.ts`, rồi `migration:generate`. Sau `npm run build`, áp migration: `npm run migration:run:dist`.
+
 ---
 
 Mã nền tảng: [Nest](https://github.com/nestjs/nest) starter.

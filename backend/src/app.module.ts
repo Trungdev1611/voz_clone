@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import {
+  buildTypeOrmOptions,
+  migrationsGlobCompiled,
+  readDbCredentials,
+} from './database/typeorm.shared';
+import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -18,19 +24,15 @@ import { HealthModule } from './health/health.module';
       },
     ]),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: parseInt(String(config.get('DB_PORT') ?? '5432'), 10),
-        username: config.get<string>('DB_USER', 'voz'),
-        password: config.get<string>('DB_PASSWORD', 'voz'),
-        database: config.get<string>('DB_NAME', 'voz_clone'),
-        autoLoadEntities: true,
-        synchronize: false,
+      useFactory: () => ({
+        ...buildTypeOrmOptions(
+          readDbCredentials(),
+          migrationsGlobCompiled(__dirname),
+        ),
+        migrationsRun: false,
       }),
     }),
+    AuthModule,
     HealthModule,
   ],
   controllers: [AppController],

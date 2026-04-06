@@ -17,7 +17,17 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs",
+    "migration:run:local": "npm run typeorm -- migration:run -d src/database/data-source.ts",
+    "migration:revert:local": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
+    "migration:show:local": "npm run typeorm -- migration:show -d src/database/data-source.ts",
+    "migration:generate:local": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
+    "migration:run": "docker compose -f ../docker-compose.yml exec -T nestjs_app npm run migration:run:local",
+    "migration:revert": "docker compose -f ../docker-compose.yml exec -T nestjs_app npm run migration:revert:local",
+    "migration:show": "docker compose -f ../docker-compose.yml exec -T nestjs_app npm run migration:show:local",
+    "migration:generate": "docker compose -f ../docker-compose.yml exec -T nestjs_app npm run migration:generate:local",
+    "migration:run:dist": "node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

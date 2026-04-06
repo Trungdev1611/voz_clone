@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo_Black, Be_Vietnam_Pro, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import { QueryProvider } from "@/providers/query-provider";
 import "./globals.css";
 
@@ -40,7 +41,20 @@ export default function RootLayout({
       className={`${beVietnam.variable} ${jetbrainsMono.variable} ${archivoDisplay.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 2500,
+              style: {
+                background: "#111827",
+                color: "#f9fafb",
+                border: "1px solid #374151",
+              },
+            }}
+          />
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,16 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import {
+  useRegisterMutation,
+} from "@/hooks/auth/use-register-mutation";
+import { toErrorMessage } from "@/hooks/helper";
 
 export function RegisterForm() {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [agree, setAgree] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const registerMutation = useRegisterMutation();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
     if (password !== confirm) {
@@ -21,8 +29,17 @@ export function RegisterForm() {
       setFormError("Vui lòng đồng ý nội quy.");
       return;
     }
-    // Nối API: POST /auth/register
-    console.info("[mock register]", { username, email });
+    try {
+      const result = await registerMutation.mutateAsync({
+        username,
+        email,
+        password,
+      });
+      toast.success(result?.message ?? "Đăng ký thành công");
+      router.push("/dang-nhap");
+    } catch (error) {
+      setFormError(toErrorMessage(error));
+    }
   }
 
   return (
@@ -131,13 +148,11 @@ export function RegisterForm() {
       </label>
       <button
         type="submit"
+        disabled={registerMutation.isPending}
         className="w-full rounded bg-[var(--forum-accent)] py-2.5 text-[14px] font-semibold text-[var(--forum-accent-contrast)] transition-opacity hover:opacity-90"
       >
-        Đăng ký
+        {registerMutation.isPending ? "Đang đăng ký..." : "Đăng ký"}
       </button>
-      <p className="text-center text-[11px] text-[var(--forum-muted)]">
-        Gửi form chỉ log mock trong console — chưa gọi backend.
-      </p>
     </form>
   );
 }

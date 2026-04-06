@@ -1,16 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
+import { toErrorMessage } from "@/hooks/helper";
+import { useLoginMutation } from "@/hooks/auth/use-login-mutation";
 
 export function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
+  const loginMutation = useLoginMutation();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Nối API: POST /auth/login
-    console.info("[mock login]", { username, remember });
+    try {
+      const result = await loginMutation.mutateAsync({
+        usernameOrEmail: username,
+        password,
+      });
+      toast.success(result?.message ?? "Đăng nhập thành công");
+      console.info("[login ok]", { username, remember, result });
+    } catch (error) {
+      toast.error(toErrorMessage(error));
+    }
   }
 
   return (
@@ -75,13 +87,11 @@ export function LoginForm() {
       </div>
       <button
         type="submit"
+        disabled={loginMutation.isPending}
         className="w-full rounded bg-[var(--forum-accent)] py-2.5 text-[14px] font-semibold text-[var(--forum-accent-contrast)] transition-opacity hover:opacity-90"
       >
-        Đăng nhập
+        {loginMutation.isPending ? "Đang đăng nhập..." : "Đăng nhập"}
       </button>
-      <p className="text-center text-[11px] text-[var(--forum-muted)]">
-        Gửi form chỉ log mock trong console — chưa gọi backend.
-      </p>
     </form>
   );
 }

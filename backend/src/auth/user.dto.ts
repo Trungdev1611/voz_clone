@@ -10,3 +10,11 @@ export class CreateUserDto {
   @MinLength(6, { message: 'Mật khẩu ít nhất 6 ký tự' })
   password: string;
 }
+
+export class LoginDto {
+  @IsNotEmpty()
+  usernameOrEmail: string;
+
+  @MinLength(6, { message: 'Mật khẩu ít nhất 6 ký tự' })
+  password: string;
+}
