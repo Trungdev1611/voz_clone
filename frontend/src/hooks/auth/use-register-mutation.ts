@@ -1,8 +1,8 @@
 "use client";
+import { apiClient } from '@/lib/api-client';
 
 import { useMutation } from "@tanstack/react-query";
 
-import { apiClient } from "@/lib/api-client";
 import { toErrorMessage } from "../helper";
 
 export type RegisterInput = {
@@ -15,8 +15,8 @@ export type RegisterInput = {
 export function useRegisterMutation() {
   return useMutation({
     mutationFn: async (payload: RegisterInput) => {
-      const { data } = await apiClient.post("/auth/register", payload);
-      return data;
+      const { data } = await apiClient.post("/v1/auth/register", payload);
+      return data?.data ?? data;
     },
     onError: (error) => {
       console.error("[register error]", toErrorMessage(error));

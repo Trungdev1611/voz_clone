@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
+import { UserEntity } from 'src/auth/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne } from 'typeorm';
 
 export enum UserGender {
   MALE = 'male',
@@ -31,5 +32,9 @@ export class UserProfileEntity extends BaseEntity {
 
     @Column({ unique: true, nullable: true }) //CMND/CCCD
     citizen_id ?: string;
+
+    // Quan hệ ngược lại (Inverse side) - không cần @JoinColumn
+    @OneToOne(() => UserEntity, (user) => user.profile)
+    user: UserEntity;
 
 }

@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 type ApiErrorPayload = {
+  success?: boolean;
   message?: string | string[];
   error?: string;
   statusCode?: number;

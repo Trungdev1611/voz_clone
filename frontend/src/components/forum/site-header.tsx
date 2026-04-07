@@ -1,6 +1,26 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useLogoutMutation, useMeQuery } from "@/hooks/auth/use-auth";
+import { toErrorMessage } from "@/hooks/helper";
 
 export function SiteHeader() {
+  const router = useRouter();
+  const { data: me, isLoading } = useMeQuery();
+  const logoutMutation = useLogoutMutation();
+
+  async function handleLogout() {
+    try {
+      const message = await logoutMutation.mutateAsync();
+      toast.success(message);
+      router.push("/");
+    } catch (error) {
+      toast.error(toErrorMessage(error));
+    }
+  }
+
   return (
     <header className="forum-header border-b border-[var(--forum-border)]">
       <div className="forum-topbar text-[11px] text-[var(--forum-muted)]">
@@ -13,21 +33,44 @@ export function SiteHeader() {
             <span className="opacity-50">FAQ</span>
             <span className="opacity-50">Nội quy</span>
           </nav>
-          <div className="flex items-center gap-3 font-mono text-[10px]">
-            <span>Chào, Khách</span>
-            <Link
-              href="/dang-nhap"
-              className="inline-block rounded border border-[var(--forum-border)] bg-[var(--forum-panel)] px-2 py-0.5 hover:border-[var(--forum-accent)]"
-            >
-              Đăng nhập
-            </Link>
-            <Link
-              href="/dang-ky"
-              className="inline-block rounded bg-[var(--forum-accent)] px-2 py-0.5 font-sans text-[11px] font-medium text-[var(--forum-accent-contrast)] hover:opacity-90"
-            >
-              Đăng ký
-            </Link>
-          </div>
+          {isLoading ? (
+            <div className="flex items-center gap-3 font-mono text-[10px]">
+              <span>Đang tải...</span>
+            </div>
+          ) : me ? (
+            <div className="flex items-center gap-3 font-mono text-[10px]">
+              <span>
+                Chào, <strong>{me.username}</strong>
+              </span>
+              <span className="rounded border border-[var(--forum-border)] bg-[var(--forum-panel)] px-2 py-0.5">
+                {me.role}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+                className="inline-block rounded border border-[var(--forum-border)] bg-[var(--forum-panel)] px-2 py-0.5 hover:border-[var(--forum-accent)]"
+              >
+                {logoutMutation.isPending ? "Đang thoát..." : "Đăng xuất"}
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 font-mono text-[10px]">
+              <span>Chào, Khách</span>
+              <Link
+                href="/dang-nhap"
+                className="inline-block rounded border border-[var(--forum-border)] bg-[var(--forum-panel)] px-2 py-0.5 hover:border-[var(--forum-accent)]"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                href="/dang-ky"
+                className="inline-block rounded bg-[var(--forum-accent)] px-2 py-0.5 font-sans text-[11px] font-medium text-[var(--forum-accent-contrast)] hover:opacity-90"
+              >
+                Đăng ký
+              </Link>
+            </div>
+          )}
         </div>
       </div>
       <div className="forum-brand border-b border-[var(--forum-border)] bg-[var(--forum-panel)]">

@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "TS_NODE_PROJECT=tsconfig.typeorm.json typeorm-ts-node-commonjs",
+    "typeorm": "TS_NODE_PROJECT=tsconfig.typeorm.json node -r ts-node/register -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:run:local": "npm run typeorm -- migration:run -d src/database/data-source.ts",
     "migration:revert:local": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
     "migration:show:local": "npm run typeorm -- migration:show -d src/database/data-source.ts",

@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { toErrorMessage } from "@/hooks/helper";
-import { useLoginMutation } from "@/hooks/auth/use-login-mutation";
+import { authQueryKeys, useLoginMutation } from "@/hooks/auth/use-auth";
 
 export function LoginForm() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -19,7 +23,12 @@ export function LoginForm() {
         password,
       });
       toast.success(result?.message ?? "Đăng nhập thành công");
-      console.info("[login ok]", { username, remember, result });
+      queryClient.setQueryData(authQueryKeys.me, result?.user ?? null); //set cache cho data user ngay, tránh hiện tượng đã login nhưng trang vẫn nhận là chưa login do cache cũ. Cũng có thể dùng queryClient.invalidateQueries để xóa cache cũ, nhưng cách này sẽ
+      
+      //gọi lại API /auth/me để lấy data user mới, đánh dấu cái setQuery trên hết hạn, sau đó sang màn home có header ở dưới api k bị gọi lại vì data mới fetch ở dưới trùng key
+      //việc set invalidateQueries sẽ khiến data mới trên tất cả components dùng auth/me authQueryKeys.me
+      void queryClient.invalidateQueries({ queryKey: authQueryKeys.me });
+      router.push("/");
     } catch (error) {
       toast.error(toErrorMessage(error));
     }

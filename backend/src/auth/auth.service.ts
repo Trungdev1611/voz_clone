@@ -1,8 +1,10 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto, LoginDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from './user.entity';
@@ -11,7 +13,10 @@ import { UserEntityRepository } from './auth.repository';
 
 @Injectable()
 export class AuthService {
-constructor(private readonly userRepo: UserEntityRepository) {}
+constructor(
+  private readonly userRepo: UserEntityRepository,
+  private readonly jwtService: JwtService,
+) {}
 
   private toPublicUser(user: UserEntity) {
     return {
@@ -60,8 +65,51 @@ constructor(private readonly userRepo: UserEntityRepository) {}
     if (!isMatch)
       throw new UnauthorizedException('Sai tài khoản hoặc mật khẩu');
 
+    const accessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      username: user.username,
+      role: user.role,
+    });
+
     return {
       message: 'Đăng nhập thành công',
+      accessToken,
+      user: this.toPublicUser(user),
+    };
+  }
+
+  async getMeFromAccessToken(accessToken: string, isProfile?: boolean) {
+    let payload: { sub?: number };
+    try {
+      payload = await this.jwtService.verifyAsync(accessToken);
+    } catch {
+      throw new UnauthorizedException('Phiên đăng nhập không hợp lệ');
+    }
+
+    if (!payload?.sub) {
+      throw new UnauthorizedException('Phiên đăng nhập không hợp lệ');
+    }
+    let user
+    if (isProfile) {
+        user = await this.userRepo.findOneDependOnProperty({
+      where: { id: payload.sub },
+      select: { id: true,
+        username: true,
+        email: true,
+        role: true,
+        profile: { avatar: true, custom_title: true, birthday: true } },
+    
+    });
+    } else {
+            user = await this.userRepo.findOneDependOnProperty({
+      where: { id: payload.sub },
+    });
+    }
+
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+
+    return {
+      message: 'Lấy thông tin người dùng thành công',
       user: this.toPublicUser(user),
     };
   }

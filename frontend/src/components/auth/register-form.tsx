@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import {
-  useRegisterMutation,
-} from "@/hooks/auth/use-register-mutation";
+import { useRegisterMutation } from "@/hooks/auth/use-auth";
 import { toErrorMessage } from "@/hooks/helper";
 
 export function RegisterForm() {

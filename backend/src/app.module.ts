@@ -12,6 +12,7 @@ import {
 } from './database/typeorm.shared';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { HealthModule } from './health/health.module';
     }),
     AuthModule,
     HealthModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [
