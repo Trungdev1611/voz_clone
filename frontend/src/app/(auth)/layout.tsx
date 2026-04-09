@@ -1,5 +1,5 @@
-import { SiteFooter } from "@/components/forum/site-footer";
-import { SiteHeader } from "@/components/forum/site-header";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
 
 export default function AuthLayout({
   children,

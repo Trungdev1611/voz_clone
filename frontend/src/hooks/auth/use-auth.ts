@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { apiClient } from "@/lib/api-client";
 import { toErrorMessage } from "@/hooks/helper";
+import { authQueryKeys } from "./authQueryKey";
 
 export type AuthUser = {
   id: number;
@@ -23,9 +24,7 @@ export type LoginInput = {
   password: string;
 };
 
-export const authQueryKeys = {
-  me: ["auth", "me"] as const,
-};
+
 
 
 
@@ -33,7 +32,7 @@ export function useRegisterMutation() {
   return useMutation({
     mutationFn: async (payload: RegisterInput) => {
       const { data } = await apiClient.post("/v1/auth/register", payload);
-      return data?.data ?? data;
+      return data;
     },
     onError: (error) => {
       console.error("[register error]", toErrorMessage(error));
@@ -45,7 +44,7 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: async (payload: LoginInput) => {
       const { data } = await apiClient.post("/v1/auth/login", payload);
-      return data?.data ?? data;
+      return data;
     },
     onError: (error) => {
       console.error("[login error]", toErrorMessage(error));
@@ -58,8 +57,8 @@ export function useMeQuery() {
     queryKey: authQueryKeys.me,
     queryFn: async () => {
       try {
-        const { data } = await apiClient.get("/v1/auth/me");
-        return (data?.data?.user ?? null) as AuthUser | null;
+        const { data } = await apiClient.get<{ user: AuthUser }>("/v1/auth/me");
+        return (data?.user ?? null) as AuthUser | null;
       } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 401) {
           return null;
@@ -76,7 +75,9 @@ export function useLogoutMutation() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data } = await apiClient.post("/v1/auth/logout");
+      const { data } = await apiClient.post<{ message: string }>(
+        "/v1/auth/logout",
+      );
       return data?.message ?? "Đăng xuất thành công";
     },
     onSuccess: () => {

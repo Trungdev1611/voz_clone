@@ -1,5 +1,6 @@
+import { ThreadEntity } from 'src/thread/entities/thread.entity';
 import { UserProfileEntity } from 'src/user_profile/user_profile.entity';
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 
 export enum Role {
   ADMIN = 'admin',
@@ -32,5 +33,9 @@ export class UserEntity  extends BaseEntity {
   })
   @JoinColumn() // Bắt buộc phải có ở bên sở hữu quan hệ (Owner side)
   profile: UserProfileEntity;
+
+
+  @OneToMany(() => ThreadEntity, thread => thread.author)
+  threads: ThreadEntity[];
 
 }

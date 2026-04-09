@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { toErrorMessage } from "@/hooks/helper";
-import { authQueryKeys, useLoginMutation } from "@/hooks/auth/use-auth";
+import { useLoginMutation } from "@/hooks/auth/use-auth";
+import { authQueryKeys } from "@/hooks/auth/authQueryKey";
 
 export function LoginForm() {
   const router = useRouter();

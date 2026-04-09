@@ -13,6 +13,7 @@ import {
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ThreadModule } from './thread/thread.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CategoriesModule } from './categories/categories.module';
     AuthModule,
     HealthModule,
     CategoriesModule,
+    ThreadModule,
   ],
   controllers: [AppController],
   providers: [

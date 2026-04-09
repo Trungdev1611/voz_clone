@@ -6,9 +6,11 @@ import { UserProfileEntity } from '../user_profile/user_profile.entity';
 //config to direct to .env file in root, not in backend
 import { config } from 'dotenv';
 import { CategoryForumEntity } from 'src/categories/entities/category.entity';
+import { ThreadEntity } from 'src/thread/entities/thread.entity';
 config({ path: join(__dirname, '../../../.env') }); //env ở thư mục backend
 /** Entity dùng cho migration CLI và TypeOrmModule (thêm entity mới thì khai báo ở đây). */
-export const typeOrmEntityList = [UserEntity, UserProfileEntity, CategoryForumEntity];
+export const typeOrmEntityList = [UserEntity, UserProfileEntity, CategoryForumEntity,
+  ThreadEntity,];
 
 export type DbCredentials = {
   host: string;

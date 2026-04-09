@@ -16,7 +16,7 @@ export function useRegisterMutation() {
   return useMutation({
     mutationFn: async (payload: RegisterInput) => {
       const { data } = await apiClient.post("/v1/auth/register", payload);
-      return data?.data ?? data;
+      return data;
     },
     onError: (error) => {
       console.error("[register error]", toErrorMessage(error));

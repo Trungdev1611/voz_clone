@@ -1,6 +1,6 @@
-import { SiteFooter } from "@/components/forum/site-footer";
-import { SiteHeader } from "@/components/forum/site-header";
-import { SidebarStats } from "@/components/forum/sidebar-stats";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SidebarStats } from "@/components/layout/sidebar-stats";
 
 export default function ForumLayout({
   children,

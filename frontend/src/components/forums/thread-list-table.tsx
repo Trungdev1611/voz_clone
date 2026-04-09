@@ -1,12 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import type { MockForum, MockThread } from "@/lib/mock-forum";
+import type { ThreadListRow } from "@/types/thread";
 
 export function ThreadListTable({
   forum,
   threads,
 }: {
-  forum: MockForum;
-  threads: MockThread[];
+  forum: { id: string; name: string };
+  threads: ThreadListRow[];
 }) {
   return (
     <section className="overflow-hidden rounded border border-[var(--forum-border)]">
@@ -14,19 +16,13 @@ export function ThreadListTable({
         <h1 className="text-[14px] font-semibold text-[var(--forum-text)]">
           {forum.name}
         </h1>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            disabled
-            className="rounded border border-[var(--forum-border)] bg-[var(--forum-panel)] px-2 py-1 text-[11px] text-[var(--forum-muted)]"
-          >
-            + Chủ đề mới (API)
-          </button>
+        <div className="text-[11px] text-[var(--forum-muted)]">
+          Tổng: {threads.length.toLocaleString("vi-VN")} chủ đề
         </div>
       </div>
       {threads.length === 0 ? (
         <p className="border-t border-[var(--forum-border)] bg-[var(--forum-bg)] px-3 py-8 text-center text-[13px] text-[var(--forum-muted)]">
-          Chưa có chủ đề — sau này hiển thị danh sách từ API.
+          Chưa có thread nào.
         </p>
       ) : (
         <div className="overflow-x-auto border-t border-[var(--forum-border)]">

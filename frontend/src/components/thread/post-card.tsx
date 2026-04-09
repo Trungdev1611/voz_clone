@@ -1,4 +1,4 @@
-import type { MockPost } from "@/lib/mock-forum";
+import type { ThreadPostDisplay } from "@/types/thread";
 
 function Avatar({ author, hue }: { author: string; hue: number }) {
   const initial = author.slice(0, 1).toUpperCase();
@@ -15,7 +15,7 @@ function Avatar({ author, hue }: { author: string; hue: number }) {
   );
 }
 
-export function PostCard({ post }: { post: MockPost }) {
+export function PostCard({ post }: { post: ThreadPostDisplay }) {
   return (
     <article
       id={`post-${post.id}`}
@@ -54,7 +54,7 @@ export function PostCard({ post }: { post: MockPost }) {
           <span className="opacity-60">Báo cáo · Trích dẫn (API)</span>
         </div>
         <div className="post-body px-3 py-4 text-[13px] leading-relaxed text-[var(--forum-text)]">
-          {post.body.split("\n").map((line, i) => (
+          {post.body.split("\n").map((line: string, i: number) => (
             <p key={i} className={i > 0 ? "mt-3" : ""}>
               {line}
             </p>

@@ -1,12 +1,12 @@
-import type { MockPost, MockThread } from "@/lib/mock-forum";
+import type { ThreadPostDisplay, ThreadViewHeader } from "@/types/thread";
 import { PostCard } from "./post-card";
 
 export function ThreadView({
   thread,
   posts,
 }: {
-  thread: MockThread;
-  posts: MockPost[];
+  thread: ThreadViewHeader;
+  posts: ThreadPostDisplay[];
 }) {
   return (
     <section className="overflow-hidden rounded border border-[var(--forum-border)]">
@@ -34,7 +34,7 @@ export function ThreadView({
       <div className="border-t border-[var(--forum-border)]">
         {posts.length === 0 ? (
           <p className="px-3 py-8 text-center text-[13px] text-[var(--forum-muted)]">
-            Chưa có bài viết (mock).
+            Chưa có bài viết.
           </p>
         ) : (
           posts.map((p) => <PostCard key={p.id} post={p} />)
