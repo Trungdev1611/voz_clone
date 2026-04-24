@@ -19,8 +19,6 @@ import { BullModule } from '@nestjs/bullmq';
 
 import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
-import { CommentsModule } from './modules/comments/comments.module';
-import { CommentsModule } from './src/comments/comments.module';
 import { CommentsModule } from './comments/comments.module';
 
 @Module({
