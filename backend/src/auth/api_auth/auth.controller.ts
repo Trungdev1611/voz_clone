@@ -8,36 +8,30 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { AuthService } from './auth.service';
-import { CreateUserDto, LoginDto } from './user.dto';
-
+import { AuthService } from '../service_auth/auth.service';
+import { CreateUserDto, LoginDto, ResendVerificationDto } from './dto/user.dto';
+import { readVozAccessTokenFromCookie } from '../read-voz-access-token';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   private readAccessTokenFromCookie(request: Request): string {
-    const cookieHeader = request.headers.cookie;
-    if (!cookieHeader) {
+    try {
+      return readVozAccessTokenFromCookie(request);
+    } catch {
       throw new UnauthorizedException('Bạn chưa đăng nhập');
     }
-
-    const tokenPair = cookieHeader
-      .split(';')
-      .map((part) => part.trim())
-      .find((part) => part.startsWith('voz_access_token='));
-
-    const token = tokenPair?.split('=')[1];
-    if (!token) {
-      throw new UnauthorizedException('Bạn chưa đăng nhập');
-    }
-
-    return decodeURIComponent(token);
   }
 
   @Post('register')
   async register(@Body() userdto: CreateUserDto) {
     return this.authService.register(userdto);
+  }
+
+  @Post('resend-verification')
+  async resendVerification(@Body() body: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(body.email);
   }
 
   @Post('login')

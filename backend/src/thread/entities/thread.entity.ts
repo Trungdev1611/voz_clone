@@ -1,6 +1,7 @@
 import { UserEntity } from 'src/auth/user.entity';
 import { CategoryForumEntity } from 'src/categories/entities/category.entity';
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn } from 'typeorm';
+import { CommentEntity } from 'src/comments/entities/comment.entity';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity({ name: 'thread' })
 export class ThreadEntity extends BaseEntity {
@@ -44,5 +45,7 @@ export class ThreadEntity extends BaseEntity {
     @JoinColumn({ name: 'category_id' })
     category: CategoryForumEntity;
 
-  
+    @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.thread, 
+    { cascade: true, onDelete: 'CASCADE' }) //khi xóa thread thì xóa tất cả comments của thread đó
+    comments: CommentEntity[];
 }

@@ -39,6 +39,14 @@ export class UserEntityRepository {
     return this.repository.findOne(options);
   }
 
+  async findManyOptions(options: FindManyOptions<UserEntity>): Promise<UserEntity[]> {
+    return this.repository.find(options);
+  }
+
+  async delete(ids: number[]): Promise<void> {
+    await this.repository.delete(ids);
+  }
+
 //   // 2. Hàm tìm theo ID với Error Handling tích hợp
 //   async findById(id: any): Promise<EntityName> {
 //     const record = await this.repository.findOne({ where: { id } as any });

@@ -7,9 +7,11 @@ export function ThreadListTable({
   forum,
   threads,
 }: {
-  forum: { id: string; name: string };
+  forum: { id: string; name: string; slug: string };
   threads: ThreadListRow[];
 }) {
+  console.log(`forum: ${forum}`);
+  console.log(`threads: ${threads}`);
   return (
     <section className="overflow-hidden rounded border border-[var(--forum-border)]">
       <div className="forum-category-head flex flex-wrap items-center justify-between gap-2 px-3 py-2">
@@ -56,7 +58,7 @@ export function ThreadListTable({
                         </span>
                       )}
                       <Link
-                        href={`/threads/${t.id}`}
+                        href={`/forums/${forum.slug}/thread/${t.id}`}
                         className="font-medium text-[var(--forum-link)] hover:text-[var(--forum-link-hover)] hover:underline"
                       >
                         {t.title}

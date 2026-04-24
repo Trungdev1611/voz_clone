@@ -1,5 +1,6 @@
 import type { ThreadPostDisplay, ThreadViewHeader } from "@/types/thread";
 import { PostCard } from "./post-card";
+import { useMeQuery } from "@/hooks/auth/use-auth";
 
 export function ThreadView({
   thread,
@@ -8,6 +9,8 @@ export function ThreadView({
   thread: ThreadViewHeader;
   posts: ThreadPostDisplay[];
 }) {
+  const { data: me } = useMeQuery();
+  const isAuthenticated = me?.id;
   return (
     <section className="overflow-hidden rounded border border-[var(--forum-border)]">
       <div className="forum-category-head px-3 py-2">
@@ -45,7 +48,8 @@ export function ThreadView({
           Ô trả lời nhanh / editor BBCode sẽ đặt ở đây khi có API đăng nhập &amp; post.
         </p>
         <textarea
-          disabled
+        //disabled textarea if user is not authenticated
+          disabled={!isAuthenticated}
           rows={4}
           className="forum-input mt-2 w-full resize-y rounded border border-[var(--forum-border)] bg-[var(--forum-bg)] p-2 text-[13px] text-[var(--forum-muted)]"
           placeholder="Viết trả lời… (bật khi đã auth)"

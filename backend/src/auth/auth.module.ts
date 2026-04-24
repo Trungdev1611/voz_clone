@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthController } from './auth.controller';
+import { AuthController } from './api_auth/auth.controller';
 import { UserEntityRepository } from './auth.repository';
-import { AuthService } from './auth.service';
+import { AuthService } from './service_auth/auth.service';
 import { UserEntity } from './user.entity';
+import { AuthCookieGuard } from './guards/auth-cookie.guard';
+import { AuthQueueProducerModule } from './queue_auth/auth.queue.producer.module';
 
 @Module({
   imports: [
@@ -21,8 +23,10 @@ import { UserEntity } from './user.entity';
       }),
     }),
     TypeOrmModule.forFeature([UserEntity]),
+    AuthQueueProducerModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserEntityRepository],
+  providers: [AuthService, AuthCookieGuard, UserEntityRepository],
+  exports: [AuthService, AuthCookieGuard],
 })
 export class AuthModule {}

@@ -13,7 +13,7 @@ export function ForumThreadsContent({
   onCreate,
   isCreating = false,
 }: {
-  forum: { id: string; name: string };
+  forum: { id: string; name: string; slug: string };
   threads: ThreadListRow[];
   onCreate: (draft: NewThreadDraft) => Promise<void> | void;
   isCreating?: boolean;

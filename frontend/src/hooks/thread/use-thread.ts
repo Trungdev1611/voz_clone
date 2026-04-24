@@ -1,7 +1,9 @@
 "use client";
 
+import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import type { ThreadDetail } from "@/types/thread";
 import { threadQueryKeys } from "./threadQueryKey";
 
 export type ThreadApiItem = {
@@ -21,7 +23,6 @@ export type CreateThreadInput = {
   title: string;
   content: string;
   categorySlug: string;
-  authorId: number;
 };
 
 export function useThreadListQuery(
@@ -49,6 +50,22 @@ export function useThreadListQuery(
       });
       return Array.isArray(data) ? data : [];
     },
+  });
+}
+
+export function useThreadDetailQuery(threadIdParam: string) {
+  const id = Number.parseInt(threadIdParam, 10);
+  const valid = Number.isFinite(id) && id >= 1;
+
+  return useQuery<ThreadDetail>({
+    queryKey: valid ? threadQueryKeys.detail(id) : [...threadQueryKeys.all, "detail", "invalid"],
+    enabled: valid,
+    queryFn: async () => {
+      const { data } = await apiClient.get<ThreadDetail>(`/v1/thread/${id}`);
+      return data;
+    },
+    retry: (_failureCount, err) =>
+      !(axios.isAxiosError(err) && err.response?.status === 404),
   });
 }
 

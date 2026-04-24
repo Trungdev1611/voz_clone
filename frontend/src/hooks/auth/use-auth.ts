@@ -24,6 +24,9 @@ export type LoginInput = {
   password: string;
 };
 
+export type ResendVerificationInput = {
+  email: string;
+};
 
 
 
@@ -52,6 +55,18 @@ export function useLoginMutation() {
   });
 }
 
+export function useResendVerificationMutation() {
+  return useMutation({
+    mutationFn: async (payload: ResendVerificationInput) => {
+      const { data } = await apiClient.post("/v1/auth/resend-verification", payload);
+      return data;
+    },
+    onError: (error) => {
+      console.error("[resend verification error]", toErrorMessage(error));
+    },
+  });
+}
+
 export function useMeQuery() {
   return useQuery<AuthUser | null>({
     queryKey: authQueryKeys.me,
@@ -67,6 +82,9 @@ export function useMeQuery() {
       }
     },
     retry: false,
+    staleTime: 5*60*1000, //5 minutes, avoid calling api too often
+    gcTime: 10*60*1000, //10 minutes, avoid calling api too often
+    refetchOnWindowFocus: false,
   });
 }
 

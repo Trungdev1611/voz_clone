@@ -34,7 +34,11 @@ export function RegisterForm() {
         password,
       });
       toast.success(result?.message ?? "Đăng ký thành công");
-      router.push("/dang-nhap");
+      const params = new URLSearchParams({
+        email,
+        sentAt: String(Date.now()),
+      });
+      router.push(`/xac-thuc-email?${params.toString()}`);
     } catch (error) {
       setFormError(toErrorMessage(error));
     }

@@ -17,18 +17,24 @@ export type ThreadDetailCategory = {
   slug: string;
 };
 
+export type ThreadDetailAuthor = {
+  id: number;
+  username: string;
+};
+
 /** Payload GET /v1/thread/:id (sau unwrap envelope). */
 export type ThreadDetail = {
   id: number;
   title: string;
   content: string;
   slug: string;
-  authorId: number;
-  categoryId: number;
-  views: number;
-  repliesCount: number;
-  lastPostAt: string;
-  lastUserId: number;
+  authorId?: number;
+  categoryId?: number;
+  views?: number;
+  repliesCount?: number;
+  lastPostAt?: string;
+  lastUserId?: number;
+  author?: ThreadDetailAuthor | null;
   category?: ThreadDetailCategory | null;
 };
 

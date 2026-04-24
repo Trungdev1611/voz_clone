@@ -42,4 +42,9 @@ export class ThreadRepository {
   async findMany(options: FindManyOptions<ThreadEntity>): Promise<ThreadEntity[]> {
     return this.repository.find(options);
   }
+
+  async incrementViewsById(id: number, delta: number): Promise<void> {
+    if (!Number.isFinite(delta) || delta < 1) return;
+    await this.repository.increment({ id }, 'views', delta);
+  }
 }

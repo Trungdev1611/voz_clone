@@ -18,3 +18,8 @@ export class LoginDto {
   @MinLength(6, { message: 'Mật khẩu ít nhất 6 ký tự' })
   password: string;
 }
+
+export class ResendVerificationDto {
+  @IsEmail()
+  email: string;
+}

@@ -1,6 +1,8 @@
 "use client";
 
-import axios, { type AxiosResponse } from "axios";
+import axios, { type AxiosError, type AxiosResponse } from "axios";
+import { getQueryClient } from "@/lib/query-client";
+import { authQueryKeys } from "@/hooks/auth/authQueryKey";
 
 type SuccessEnvelope = {
   success: true;
@@ -53,6 +55,22 @@ function unwrapApiBody(body: unknown): unknown {
   return inner;
 }
 
+/** 401 tại các route này là “sai mật khẩu / đăng ký”, không phải session hết — không xóa cache user. */
+const PATHS_SKIP_SESSION_CLEAR_ON_401 = ["/v1/auth/login", "/v1/auth/register"];
+
+function normalizeRequestPath(url: string | undefined): string {
+  if (!url) return "";
+  const noQuery = url.split("?")[0];
+  return noQuery.replace(/^https?:\/\/[^/]+/, "");
+}
+
+function shouldClearMeOn401(requestUrl: string | undefined): boolean {
+  const path = normalizeRequestPath(requestUrl);
+  return !PATHS_SKIP_SESSION_CLEAR_ON_401.some(
+    (p) => path === p || path.endsWith(p),
+  );
+}
+
 export const apiClient = axios.create({
   baseURL:
     (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000") + "/api",
@@ -62,7 +80,19 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.response.use((response: AxiosResponse) => {
-  response.data = unwrapApiBody(response.data);
-  return response;
-});
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    response.data = unwrapApiBody(response.data);
+    return response;
+  },
+  (error: AxiosError) => {
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      shouldClearMeOn401(error.config?.url)
+    ) {
+      getQueryClient().setQueryData(authQueryKeys.me, null);
+    }
+    return Promise.reject(error);
+  },
+);

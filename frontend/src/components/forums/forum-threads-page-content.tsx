@@ -69,7 +69,6 @@ export function ForumThreadsPageContent({ forumKey }: { forumKey: string }) {
       title: draft.title,
       content: draft.body || "Bài viết mới.",
       categorySlug: currentForum.slug,
-      authorId: me.id,
     });
 
     await refetchThreadList();
@@ -84,7 +83,11 @@ export function ForumThreadsPageContent({ forumKey }: { forumKey: string }) {
         ]}
       />
       <ForumThreadsContent
-        forum={{ id: String(currentForum.id), name: currentForum.name }}
+        forum={{
+          id: String(currentForum.id),
+          name: currentForum.name,
+          slug: currentForum.slug,
+        }}
         threads={threadsFromApi}
         onCreate={handleCreateThread}
         isCreating={createThreadMutation.isPending}

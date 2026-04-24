@@ -1,3 +1,4 @@
+import { FindManyOptions } from 'typeorm';
 import {
   ConflictException,
   Injectable,
@@ -5,18 +6,31 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto, LoginDto } from './user.dto';
+import { CreateUserDto, LoginDto } from '../api_auth/dto/user.dto';
 import * as bcrypt from 'bcrypt';
-import { UserEntity } from './user.entity';
-import { plainToInstance } from 'class-transformer';
-import { UserEntityRepository } from './auth.repository';
+import { UserEntity } from '../user.entity';
+import { UserEntityRepository } from '../auth.repository';
+import { AuthProducer } from '../queue_auth/auth.producer';
 
 @Injectable()
 export class AuthService {
 constructor(
   private readonly userRepo: UserEntityRepository,
   private readonly jwtService: JwtService,
+  private readonly authProducer: AuthProducer,
 ) {}
+
+  private async enqueueVerificationEmail(user: UserEntity) {
+    const token = await this.jwtService.signAsync(
+      { sub: user.id },
+      { expiresIn: '15m' },
+    );
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+    await this.authProducer.sendEmail(user.email, 'email-verify.hbs', {
+      url: verificationUrl,
+    }, `verify-email:user:#${user.id}` ); //jobId là unique để track job // nếu trùng jobId sẽ bỏ qua cái mới nhất và thực hiện job cũ
+  
+  }
 
   private toPublicUser(user: UserEntity) {
     return {
@@ -40,15 +54,20 @@ constructor(
       throw new ConflictException('Username is already in use');
 
     const hashedPassword = await bcrypt.hash(createDto.password, 10);
-
-    const userEntity = plainToInstance(UserEntity, {
-      ...createDto,
+    const userEntity: Partial<UserEntity> = {
+      username: createDto.username,
+      email: createDto.email,
       password_hash: hashedPassword,
-    });
+      isVerified: false, //chưa verify khi tạo user => wait for verify email => change to true
+    };
 
     const created = await this.userRepo.create(userEntity);
+
+    await this.enqueueVerificationEmail(created);
+
+    
     return {
-      message: 'Đăng ký thành công',
+      message: 'Vui lòng xác thực email để hoàn tất đăng ký. Hiệu lực 15 phút',
       user: this.toPublicUser(created),
     };
   }
@@ -57,6 +76,13 @@ constructor(
     const identifier = loginDto.usernameOrEmail.trim();
     const user = await this.userRepo.findOneDependOnProperty({
       where: [{ email: identifier }, { username: identifier }],
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        password_hash: true,
+      },
     });
 
     if (!user) throw new UnauthorizedException('Sai tài khoản hoặc mật khẩu');
@@ -64,6 +90,10 @@ constructor(
     const isMatch = await bcrypt.compare(loginDto.password, user.password_hash);
     if (!isMatch)
       throw new UnauthorizedException('Sai tài khoản hoặc mật khẩu');
+
+    if(!user.isVerified) {
+      throw new UnauthorizedException('Tài khoản chưa được xác thực');
+    }
 
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
@@ -75,6 +105,30 @@ constructor(
       message: 'Đăng nhập thành công',
       accessToken,
       user: this.toPublicUser(user),
+    };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.userRepo.findOneDependOnProperty({
+      where: { email: email.trim().toLowerCase() },
+    });
+
+    if (!user) {
+      return {
+        message:
+          'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi lại email xác thực.',
+      };
+    }
+
+    if (user.isVerified) {
+      return {
+        message: 'Tài khoản này đã được xác thực email.',
+      };
+    }
+
+    await this.enqueueVerificationEmail(user);
+    return {
+      message: 'Đã gửi lại email xác thực. Link có hiệu lực 15 phút.',
     };
   }
 
@@ -113,6 +167,8 @@ constructor(
       user: this.toPublicUser(user),
     };
   }
+
+ 
 
 //   findAll() {
 //     return `This action returns all s`;
