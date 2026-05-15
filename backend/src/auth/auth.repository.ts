@@ -24,7 +24,11 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOneOptions, FindManyOptions } from 'typeorm';
+import {
+  Repository,
+  FindOneOptions,
+  FindManyOptions,
+} from 'typeorm';
 import {UserEntity} from './user.entity';
 
 @Injectable()
@@ -45,6 +49,26 @@ export class UserEntityRepository {
 
   async delete(ids: number[]): Promise<void> {
     await this.repository.delete(ids);
+  }
+
+  async findDeletableUnverifiedUserIds(
+    cutoff: Date,
+    take: number,
+  ): Promise<number[]> {
+    const rows = await this.repository
+      .createQueryBuilder('u')
+      .leftJoin('u.threads', 't')
+      .leftJoin('u.comments', 'c')
+      .where('u.isVerified = :isVerified', { isVerified: false })
+      .andWhere('u.createdAt <= :cutoff', { cutoff })
+      .andWhere('t.id IS NULL')
+      .andWhere('c.id IS NULL')
+      .select('u.id', 'id')
+      .orderBy('u.id', 'ASC')
+      .limit(take)
+      .getRawMany<{ id: number }>();
+
+    return rows.map((row) => Number(row.id));
   }
 
 //   // 2. Hàm tìm theo ID với Error Handling tích hợp

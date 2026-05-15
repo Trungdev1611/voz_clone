@@ -11,10 +11,10 @@ export class CommentEntity extends BaseEntity {
     @Column()
     content: string;
 
-    @Column()
+    @Column({ name: 'thread_id' })
     threadId: number;
 
-    @Column()
+    @Column({ name: 'user_id' })
     userId: number;
 
     @ManyToOne(() => ThreadEntity, (thread: ThreadEntity) => thread.comments)

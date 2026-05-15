@@ -1,6 +1,5 @@
 //implement auth cleanup service
 import { Injectable, Logger } from '@nestjs/common';
-import { LessThanOrEqual } from 'typeorm';
 import { UserEntityRepository } from '../auth.repository';
 
 const UNVERIFIED_TTL_MS = 24 * 60 * 60 * 1000;
@@ -17,18 +16,14 @@ export class AuthCleanupService {
         let totalRemoved = 0;
         while (true) {
             try { //try to remove users 
-        const idUsers = await this.userRepo.findManyOptions({
-          where: {
-            isVerified: false,
-            createdAt: LessThanOrEqual(cutoff), // Do not touch newly registered users.
-          },
-          select: { id: true },
-          take: batchSize,
-        });
-        if (idUsers.length === 0) break; //if no users to remove, break the loop
+        const userIds = await this.userRepo.findDeletableUnverifiedUserIds(
+          cutoff,
+          batchSize,
+        );
+        if (userIds.length === 0) break; //if no users to remove, break the loop
     
-        totalRemoved += idUsers.length;
-        await this.userRepo.delete(idUsers.map(user => user.id)); //delete for higher performance than remove method
+        totalRemoved += userIds.length;
+        await this.userRepo.delete(userIds); //delete for higher performance than remove method
     
         // Short pause between batches to reduce DB pressure.
         await new Promise(resolve => setTimeout(resolve, 300));

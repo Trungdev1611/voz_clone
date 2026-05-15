@@ -88,6 +88,16 @@ export class ThreadService {
         where: { id },
         relations: { author: true, category: true },
         select: {
+          id: true,
+          title: true,
+          content: true,
+          slug: true,
+          authorId: true,
+          categoryId: true,
+          views: true,
+          repliesCount: true,
+          lastPostAt: true,
+          lastUserId: true,
           author: {
             id: true,
             username: true,

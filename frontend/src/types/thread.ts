@@ -22,6 +22,30 @@ export type ThreadDetailAuthor = {
   username: string;
 };
 
+export type ThreadComment = {
+  id: number;
+  content: string;
+  threadId: number;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  editExpiresAt?: string;
+  user?: {
+    id: number;
+    username: string;
+  } | null;
+};
+
+export type ThreadCommentList = {
+  items: ThreadComment[];
+  page: number;
+  per_page: number;
+  total: number;
+  total_pages: number;
+};
+
 /** Payload GET /v1/thread/:id (sau unwrap envelope). */
 export type ThreadDetail = {
   id: number;

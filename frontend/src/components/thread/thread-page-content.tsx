@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import axios from "axios";
+import { useState } from "react";
 import { Breadcrumb } from "@/components/common/breadcrumb";
 import { ThreadView } from "@/components/thread/thread-view";
+import {
+  useCommentListQuery,
+  useCreateCommentMutation,
+} from "@/hooks/comment/use-comment";
 import { useThreadDetailQuery } from "@/hooks/thread/use-thread";
 import type {
+  ThreadComment,
   ThreadDetail,
   ThreadPostDisplay,
   ThreadViewHeader,
@@ -50,6 +56,27 @@ function mapDetailToView(detail: ThreadDetail): {
   return { forumSlug, forumName, threadHeader, openerPost };
 }
 
+function mapCommentToPost(comment: ThreadComment, index: number): ThreadPostDisplay {
+  const authorId = comment.user?.id ?? comment.userId;
+  const authorName =
+    comment.user?.username ??
+    (authorId ? `user#${authorId}` : "Thành viên ẩn danh");
+
+  return {
+    id: `c-${comment.id}`,
+    author: authorName,
+    userTitle: "Thành viên",
+    joinDate: "—",
+    postCount: 0,
+    avatarHue: Math.abs((authorId || 0) * 37) % 360,
+    body: comment.content,
+    createdAt: comment.createdAt
+      ? new Date(comment.createdAt).toLocaleString("vi-VN")
+      : "—",
+    index,
+  };
+}
+
 function ThreadPageSkeleton() {
   return (
     <>
@@ -76,6 +103,17 @@ function ThreadPageSkeleton() {
 export function ThreadPageContent({ threadId }: { threadId: string }) {
   const id = Number.parseInt(threadId, 10);
   const validId = Number.isFinite(id) && id >= 1;
+  const [commentPage, setCommentPage] = useState(1);
+  const COMMENT_PER_PAGE = 20;
+  const {
+    data: commentPageData,
+    isFetching: isCommentsFetching,
+    refetch: refetchComments,
+  } = useCommentListQuery(threadId, {
+    page: commentPage,
+    per_page: COMMENT_PER_PAGE,
+  });
+  const createCommentMutation = useCreateCommentMutation(threadId);
   const { data, isPending, isError, error, refetch, isFetching } =
     useThreadDetailQuery(threadId);
 
@@ -116,6 +154,20 @@ export function ThreadPageContent({ threadId }: { threadId: string }) {
 
   const { forumSlug, forumName, threadHeader, openerPost } =
     mapDetailToView(data);
+  const comments = commentPageData?.items ?? [];
+  const commentPosts = comments.map((comment, idx) =>
+    mapCommentToPost(
+      comment,
+      (commentPage - 1) * COMMENT_PER_PAGE + idx + 2,
+    ),
+  );
+  const posts = [openerPost, ...commentPosts];
+
+  async function handleSubmitReply(content: string) {
+    await createCommentMutation.mutateAsync({ content });
+    setCommentPage(1);
+    await Promise.all([refetchComments(), refetch()]);
+  }
 
   return (
     <>
@@ -134,7 +186,40 @@ export function ThreadPageContent({ threadId }: { threadId: string }) {
           ← Quay lại danh sách chủ đề
         </Link>
       </div>
-      <ThreadView thread={threadHeader} posts={[openerPost]} />
+      <ThreadView
+        thread={threadHeader}
+        posts={posts}
+        onSubmitReply={handleSubmitReply}
+        isSubmittingReply={createCommentMutation.isPending || isCommentsFetching}
+      />
+      {(commentPageData?.total_pages ?? 1) > 1 && (
+        <div className="mt-3 flex items-center justify-end gap-2 text-[12px]">
+          <button
+            type="button"
+            disabled={commentPage <= 1}
+            onClick={() => setCommentPage((p) => Math.max(1, p - 1))}
+            className="rounded border border-[var(--forum-border)] px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Trước
+          </button>
+          <span className="text-[var(--forum-muted)]">
+            Trang {commentPageData?.page ?? commentPage}/
+            {commentPageData?.total_pages ?? 1}
+          </span>
+          <button
+            type="button"
+            disabled={commentPage >= (commentPageData?.total_pages ?? 1)}
+            onClick={() =>
+              setCommentPage((p) =>
+                Math.min(commentPageData?.total_pages ?? p, p + 1),
+              )
+            }
+            className="rounded border border-[var(--forum-border)] px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Sau
+          </button>
+        </div>
+      )}
     </>
   );
 }
